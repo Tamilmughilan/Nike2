@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
-class ImageGalleryScreen extends StatefulWidget {
+class GalleryApp extends StatefulWidget {
   @override
-  _ImageGalleryScreenState createState() => _ImageGalleryScreenState();
+  _GalleryAppState createState() => _GalleryAppState();
 }
 
-class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
+class _GalleryAppState extends State<GalleryApp> {
   List<File> _images = [];
   final ImagePicker _picker = ImagePicker();
 
@@ -20,33 +20,38 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
     }
   }
 
-  void _showFullImage(File image) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FullScreenImage(image: image),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Image Gallery")),
+      appBar: AppBar(title: const Text("Image Gallery")),
       body: Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             crossAxisSpacing: 8.0,
             mainAxisSpacing: 8.0,
           ),
-          itemCount: _images.length,
+          itemCount: _images.isEmpty ? 12 : _images.length,
           itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () => _showFullImage(_images[index]),
-              child: Image.file(_images[index], fit: BoxFit.cover),
-            );
+            if (_images.isEmpty) {
+              // Show dummy text when no images are picked
+              return Container(
+                color: Colors.grey[300],
+                child: Center(
+                  child: Text(
+                    "Image ${index + 1}",
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              );
+            } else {
+              // Show picked images
+              return GestureDetector(
+                onTap: () {},
+                child: Image.file(_images[index], fit: BoxFit.cover),
+              );
+            }
           },
         ),
       ),
@@ -54,30 +59,17 @@ class _ImageGalleryScreenState extends State<ImageGalleryScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            child: Icon(Icons.camera),
+            heroTag: "camera",
+            child: const Icon(Icons.camera_alt),
             onPressed: () => _pickImage(ImageSource.camera),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           FloatingActionButton(
-            child: Icon(Icons.photo_library),
+            heroTag: "gallery",
+            child: const Icon(Icons.photo_library),
             onPressed: () => _pickImage(ImageSource.gallery),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class FullScreenImage extends StatelessWidget {
-  final File image;
-  FullScreenImage({required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: Image.file(image),
       ),
     );
   }
